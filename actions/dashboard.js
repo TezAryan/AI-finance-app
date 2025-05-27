@@ -2,6 +2,16 @@
 
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/dist/types/server";
+import { revalidatePath } from "next/cache";
+
+
+const serializeTransaction = (obj) => {
+    const serialized = {...obj};
+
+    if(obj.balance) {
+        serialized.balance = obj.balance.toNumber();
+    }
+}
 
 export async function createAccount(data) {
     try {
@@ -26,8 +36,32 @@ export async function createAccount(data) {
         const existingAccount = await db.account.findMany({
             where: {userId: user.id},
 
+        });
+
+        const shouldBeDefault = existingAccounts.length === 0 ? true : data.isDafault;
+
+        if(shouldBeDefault) {
+            await db.account,updateMany({
+                where: {userId: user.id , isDefault: true},
+                data: {isDefault: false},
+
+            })
+        }
+        const account = await db.accont.create({
+            data: {
+                ...data, 
+                balance: balanceFloat,
+                userId: user.id,
+                IsDeafault: shouldBeDefault,
+            }
         })
 
-    } catch (error) {}
+        const serializedAccount = serializeTransaction(account);
+
+        revalidatePath("/dashboard");
+        return {success: true , data: serializedAccount};
+    } catch (error) {
+        throw new Error(error.message);
+    }
     
 }
