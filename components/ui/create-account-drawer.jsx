@@ -1,13 +1,15 @@
 
 'use client';
 import react ,{ useState } from "react";
-import { Drawer ,DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "./drawer";
+import { Drawer ,DrawerClose,DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "./drawer";
 import {zodResolver} from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { accountSchema } from "@/app/lib/schema";
 import { Input } from "./input";
 // import {Select } from "./ui/select"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
+import { Switch } from "./switch";
+import { Button } from "./button";
 
 
 
@@ -24,6 +26,11 @@ const CreateAccountDrawer = ({children}) => {
 
     }
   })
+
+  const onSubmit=async(data)=> {
+    console.log(data);
+
+  }
   
  return (
     <Drawer open={open} onOpenChange={setOpen}>
@@ -33,8 +40,8 @@ const CreateAccountDrawer = ({children}) => {
       <DrawerTitle>Create New Account</DrawerTitle>
     </DrawerHeader>   
 
-    <div>
-        <form>
+    <div className="px-4 pb-4">
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
     <div className="space-y-2">
         <label htmlFor="name" className="text-sm font-medium">Account Name</label>
         <Input id="name" placeholder="e.g., main checking"
@@ -46,7 +53,8 @@ const CreateAccountDrawer = ({children}) => {
     </div>
     <div className="space-y-2">
         <label htmlFor="name" className="text-sm font-medium">Account Type</label>
-      <Select onValueChange={(value) => setValue("type", value)}>
+      <Select onValueChange={(value) => setValue("type", value)}
+        defaultValue={watch("type")}>
   <SelectTrigger className="type">
     <SelectValue placeholder="Select Type" />
 
@@ -61,6 +69,39 @@ const CreateAccountDrawer = ({children}) => {
         {errors.type && (
             <p className="text-sm text-red-500">{errors.type.message}</p>
         )}
+
+    </div>
+
+     <div className="space-y-2">
+        <label htmlFor="name" className="text-sm font-medium">Initial Balance</label>
+        <Input id="balance"
+        type="number"
+        step="0.01"
+        placeholder="0.00"
+        {...register("balance")}/> 
+        {errors.balance && (
+            <p className="text-sm text-red-500">{errors.balance.message}</p>
+        )}
+
+    </div>
+     <div className="flex items-center justify-between rounded-lg border p-3">
+       <div className="space-y-0.5">
+        <label htmlFor="isDefault" className="text-sm font-medium cursor-pointer">Set as Default</label>
+       
+        <p className="text-sm text-muted-foreground">This account will be selected by default for transactions</p>
+        </div>
+        <Switch id="isDefault" onCheckedChange={(checked) => setValue("isDefault", checked)}
+        checked={watch("isDefault")} />
+    </div>
+    <div className="flex gap-4 pt-4">
+      <DrawerClose asChild>
+        <Button type="button" variant="outline" className="flex-1">
+          Cancel
+        </Button>
+      </DrawerClose>
+        <Button type="submit" className="flex-1">
+          Create Account
+        </Button>
 
     </div>
         </form>
